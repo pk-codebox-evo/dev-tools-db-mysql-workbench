@@ -1,4 +1,4 @@
-# Copyright (c) 2012, 2016, Oracle and/or its affiliates. All rights reserved.
+# Copyright (c) 2012, 2017, Oracle and/or its affiliates. All rights reserved.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -258,6 +258,7 @@ class ProgressMainView(WizardPage):
         else:
             self.advanced_button.set_text('Show Logs')
         self._log_box.show(self._showing_logs)
+        self.content.relayout()
     
     def go_cancel(self):
         self._cancel_requested = True
@@ -556,7 +557,7 @@ class ProgressMainView(WizardPage):
                       self.main.plan.migrationSource.connection, source_password,
                       self.main.plan.migrationTarget.connection, target_password)
 
-        self._transferer.copytable_path = self.main.plan.wbcopytables_path
+        self._transferer.copytable_path = self.main.plan.wbcopytables_path_bin
         for idx, schema_name in enumerate(self.main.plan.migrationSource.selectedSchemataNames):
             self._tasks.extend(
               [
@@ -614,6 +615,8 @@ class ProgressMainView(WizardPage):
             source_pk_list = []
             target_pk_list = []
             for column in table.columns:
+                if column.generated:
+                    continue
                 if table.isPrimaryKeyColumn(column):
                     source_pk_list.append(source_db_module.quoteIdentifier(column.oldName))
                     target_pk_list.append(target_db_module.quoteIdentifier(column.name))

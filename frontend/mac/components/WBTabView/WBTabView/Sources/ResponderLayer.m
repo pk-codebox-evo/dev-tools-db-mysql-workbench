@@ -8,7 +8,7 @@
 
 
 #import "ResponderLayer.h"
-
+#import "WBTabItem.h"
 
 
 @implementation ResponderLayer
@@ -29,10 +29,10 @@
 	mMouseDownPoint = mouse;
   
 	// Send mouse down message to all sublayers.
-	NSArray* sublayers = [self sublayers];
+	NSArray* sublayers = self.sublayers;
 	for (ResponderLayer* lay in sublayers) {
 		if ([lay isKindOfClass: [ResponderLayer class]]) {
-			if (CGRectContainsPoint([lay frame], mouse)) {
+			if (CGRectContainsPoint(lay.frame, mouse)) {
 				CGPoint localPoint = [self convertPoint: mouse
 																				toLayer: lay];
         BOOL acceptsMouse = [(ResponderLayer*)lay acceptsMouseDownAtPoint: localPoint];
@@ -44,7 +44,7 @@
             mouseHandledByLayer = lay;
           }
           else {
-            if ([lay zPosition] > [mouseHandledByLayer zPosition]) {
+            if (lay.zPosition > mouseHandledByLayer.zPosition) {
               mouseHandledByLayer = lay;
             }
           }
@@ -67,8 +67,9 @@
 
 - (void) mouseDraggedToPoint: (CGPoint) mouse;
 {
-	if ([[self delegate] respondsToSelector: @selector(mouseDraggedToPoint:)]) {
-		[[self delegate] mouseDraggedToPoint: mouse];
+  id delegate = self.delegate;
+  if ([delegate respondsToSelector: @selector(mouseDraggedToPoint:)]) {
+    [delegate mouseDraggedToPoint: mouse];
 	}
 }
 
@@ -76,8 +77,9 @@
 
 - (void) mouseUp;
 {
-	if ([[self delegate] respondsToSelector: @selector(mouseUp)]) {
-		[[self delegate] mouseUp];
+  id delegate = self.delegate;
+	if ([delegate respondsToSelector: @selector(mouseUp)]) {
+		[delegate mouseUp];
 	}
 }
 
@@ -88,10 +90,10 @@
 	ResponderLayer* layerAtPoint = nil;
 	
 	// Send mouse down message to all sublayers.
-	NSArray* sublayers = [self sublayers];
+	NSArray* sublayers = self.sublayers;
 	for (CALayer* lay in sublayers) {
 		if ([lay respondsToSelector: @selector(responderLayerAtPoint:)]) {
-			if (CGRectContainsPoint([lay frame], mouse)) {
+			if (CGRectContainsPoint(lay.frame, mouse)) {
 				CGPoint localPoint = [self convertPoint: mouse
 																				toLayer: lay];
 				layerAtPoint = [(ResponderLayer*)lay responderLayerAtPoint: localPoint];

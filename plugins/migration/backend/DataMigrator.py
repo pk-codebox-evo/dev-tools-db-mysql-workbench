@@ -235,6 +235,10 @@ class DataMigrator(object):
 
         args = self.helper_basic_arglist(self._resume)
 
+        if 'stimeout' in task:
+            args.append('--source-timeout=%s' % task['stimeout'])
+        if 'ttimeout' in task:
+            args.append('--target-timeout=%s' % task['ttimeout'])
         if self._resume:
             args.append("--resume")
 
@@ -313,9 +317,15 @@ class DataMigrator(object):
             args.append("--truncate-target")
         if self._options.get("DebugTableCopy", False):
             args.append("--log-level=debug3")
+        if self._options.get("DriverSendsDataAsUTF8", False):
+            args.append("--force-utf8-for-source")
 
         args.append("--thread-count=" + str(num_processes));
         args.append('--source-rdbms-type=%s' % self._src_conn_object.driver.owner.name)
+        if 'stimeout' in task:
+            args.append('--source-timeout=%s' % task['stimeout'])
+        if 'ttimeout' in task:
+            args.append('--target-timeout=%s' % task['ttimeout'])
 
         if 'defaultCharSet' in self._src_conn_object.parameterValues.keys():
             default_charset = self._src_conn_object.parameterValues.get("defaultCharSet")
@@ -349,11 +359,7 @@ class DataMigrator(object):
             args.append('--pythondbapi-source="%s"' % python_conn_string(self._src_conn_object))
         else:
             args.append('--odbc-source="%s"' % odbc_conn_string(self._src_conn_object, True))
-            
-        # for FreeTDS
-        if self._src_conn_object.parameterValues.get("ODBCDriverUsesUTF8", False):
-            args.append("--force-utf8-for-source")
-                
+
         if include_target_conn:
             args.append('--target="%s"' % mysql_conn_string(self._tgt_conn_object))
             if self._tgt_conn_object.parameterValues.get("OPT_ENABLE_CLEARTEXT_PLUGIN", False):
